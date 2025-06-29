@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Conduit Fill Calculator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    /* KBR Modal Styles */
+    .modal {
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      font-family: Arial, sans-serif;
+    }
+    .modal-content {
+      background-color: #f9f6f2;
+      margin: 2% auto;
+      padding: 1rem;
+      border: 3px solid #00583E; /* KBR Dark Green */
+      border-radius: 12px;
+      max-width: 98%;
+      width: 1200px; /* Increased width to fit all columns */
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px #FFC72C; /* KBR Gold glow */
+    }
+    .modal-content h2 {
+      color: #00583E;
+      margin-bottom: 0.5rem;
+    }
+    .close {
+      color: #00583E;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: -0.5rem;
+    }
+    .close:hover {
+      color: #FFC72C;
+    }
+    #modalCableTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      table-layout: fixed; /* Fix column widths */
+    }
+    #modalCableTable th, #modalCableTable td {
+      border: 1px solid #00583E;
+      padding: 0.25rem 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      white-space: nowrap; /* prevent wrapping */
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #modalCableTable th {
+      background-color: #00583E;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: normal;       /* Allow wrapping */
+      overflow-wrap: break-word; /* Break long words if needed */
+      line-height: 1.2em;        /* Adjust line height for readability */
+      padding: 0.5rem 0.5rem 3rem 0.5rem; /* More bottom padding for filter input */
+      position: relative; /* for absolute positioning inside */
+    }
+    /* Set column widths proportionally */
+    #modalCableTable th:nth-child(1), #modalCableTable td:nth-child(1) { width: 3%; }
+    #modalCableTable th:nth-child(2), #modalCableTable td:nth-child(2) { width: 15%; }
+    #modalCableTable th:nth-child(3), #modalCableTable td:nth-child(3) { width: 12%; }
+    #modalCableTable th:nth-child(4), #modalCableTable td:nth-child(4) { width: 10%; }
+    #modalCableTable th:nth-child(5), #modalCableTable td:nth-child(5) { width: 8%; }
+    #modalCableTable th:nth-child(6), #modalCableTable td:nth-child(6) { width: 12%; }
+    #modalCableTable th:nth-child(7), #modalCableTable td:nth-child(7) { width: 10%; }
+    #modalCableTable th:nth-child(8), #modalCableTable td:nth-child(8) { width: 10%; }
+    #modalCableTable th:nth-child(9), #modalCableTable td:nth-child(9) { width: 10%; }
+    #modalCableTable th:nth-child(10), #modalCableTable td:nth-child(10) { width: 10%; }
+    #modalCableTable th:nth-child(11), #modalCableTable td:nth-child(11) { width: 10%; }
+  
+    /* Header title container inside th */
+    #modalCableTable th .header-title {
+      font-weight: bold;
+      line-height: 1.2em;
+      margin-bottom: 0.3rem;
+    }
+    /* Smaller text in header titles */
+    #modalCableTable th .header-title small {
+      font-weight: normal;
+      font-size: 0.75em;
+      color: #ddd;
+      display: block;
+      margin-top: 2px;
+    }
+    /* Filter inputs in header */
+    #modalCableTable th input.filter-input {
+      position: absolute;
+      bottom: 6px; /* slightly above bottom */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      padding: 3px 6px;
+      font-size: 0.9rem;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    #modalCableTable tbody tr:hover {
+      background-color: #e0f1e9;
+    }
+    /* Add Selected button style */
+    #addSelectedBtn {
+      background-color: #00583E;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      float: right;
+    }
+    #addSelectedBtn:hover {
+      background-color: #FFC72C;
+      color: #00583E;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header-container">
+    <img id="kbr-logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/74/KBR_%28company%29_logo.svg/1200px-KBR_%28company%29_logo.svg.png" alt="KBR Logo">
+    <h1 id="main-title">Conduit Fill Calculator</h1>
+  </div>
+
+  <div id="app">
+    <section>
+      <h2>Add Cables</h2>
+
+      <div id="add-from-db">
+        <select id="cable-db-select">
+          <option value="">-- Select Cable from Database --</option>
+          {% for cable in cable_db %}
+          <option value="{{ cable.name }}|{{ cable.overall_diameter_mm }}">{{ cable.name }} ({{ cable.overall_diameter_mm }} mm)</option>
+          {% endfor %}
+        </select>
+        <button id="add-cable-db-btn">Add Cable</button>
+      </div>
+
+      <hr />
+
+      <div id="add-cable-form">
+        <input type="text" id="cable-name" placeholder="Cable Name" />
+        <input type="number" id="cable-diameter" placeholder="Diameter (mm)" min="0" step="0.1" />
+        <button id="add-cable-btn">Add Cable Manually</button>
+      </div>
+
+      <button onclick="openCableModal()">Add Cable from Database</button>
+
+      <!-- Modal -->
+      <div id="cableModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+          <span class="close" onclick="closeCableModal()" role="button" aria-label="Close modal">&times;</span>
+          <h2 id="modalTitle">Select Cables</h2>
+          <table id="modalCableTable" aria-label="Cable selection table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllCheckbox" title="Select All"/></th>
+                <th>Name<br><input type="text" class="filter-input" data-column="1" placeholder="Filter"></th>
+                <th>Brand<br><input type="text" class="filter-input" data-column="2" placeholder="Filter"></th>
+                <th>Type<br><input type="text" class="filter-input" data-column="3" placeholder="Filter"></th>
+                <th>Cores<br><input type="text" class="filter-input" data-column="4" placeholder="Filter"></th>
+                <th>Conductor Size (mm²)<br><input type="text" class="filter-input" data-column="5" placeholder="Filter"></th>
+                <th>Conductor Type<br><input type="text" class="filter-input" data-column="6" placeholder="Filter"></th>
+                <th>Insulation<br><input type="text" class="filter-input" data-column="7" placeholder="Filter"></th>
+                <th>Sheath<br><input type="text" class="filter-input" data-column="8" placeholder="Filter"></th>
+                <th>Voltage Rating<br><input type="text" class="filter-input" data-column="9" placeholder="Filter"></th>
+                <th>Overall Diameter (mm)<br><input type="text" class="filter-input" data-column="10" placeholder="Filter"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- JS will populate this -->
+            </tbody>
+          </table>
+          <button id="addSelectedBtn">Add Selected</button>
+          <div style="clear: both;"></div>
+        </div>
+      </div>
+
+      <!-- Cable Table -->
+      <table id="cable-table">
+        <thead>
+          <tr>
+            <th>Cable Name</th>
+            <th>Diameter (mm)</th>
+            <th>Cross Section Area (mm²)</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Recommendation Section -->
+      <section id="recommendation-section" style="text-align:center; margin-top: 1rem;">
+        <div style="margin-bottom: 0.5rem;">
+          <strong>Installation Method:</strong>
+          <label style="margin-left: 10px;">
+            <input type="radio" name="recommend-mode" value="single" checked />
+            Single
+          </label>
+          <label style="margin-left: 10px;">
+            <input type="radio" name="recommend-mode" value="multi" />
+            Multiple
+          </label>
+        </div>
+        <div>
+          <strong>Recommended conduit size(s):</strong>
+          <div id="recommended-conduit" style="margin-top: 0.5rem;">None</div>
+        </div>
+      </section>
+
+      <!-- Multi-Conduit Config -->
+      <section id="multi-conduit-options" style="display: none; margin-top: 1.5rem;">
+        <h2>Select Multiple Conduit Configuration</h2>
+        <label for="multi-quantity" style="margin-right: 1rem;">
+          Quantity:
+          <select id="multi-quantity">
+            <option value="" selected>-- Select quantity --</option>
+            <option value="2">2 conduits</option>
+            <option value="3">3 conduits</option>
+            <option value="4">4 conduits</option>
+            <option value="5">5 conduits</option>
+          </select>
+        </label>
+        <label for="multi-size">
+          Conduit Size:
+          <select id="multi-size">
+            <option value="" selected>-- Select conduit size --</option>
+            {% for conduit in conduit_db %}
+            <option value="{{ conduit.size }}">{{ conduit.size }} mm</option>
+            {% endfor %}
+          </select>
+        </label>
+      </section>
+
+    </section>
+
+    <!-- Single Conduit Section -->
+    <section id="single-mode-section" style="margin-top: 1.5rem;">
+      <h2>Select Conduit Size</h2>
+      <select id="conduit-select">
+        <option value="">-- Select conduit size --</option>
+        {% for conduit in conduit_db %}
+        <option value="{{ conduit.size }}">{{ conduit.size }} mm</option>
+        {% endfor %}
+      </select>
+    </section>
+
+    <!-- Fill Information -->
+    <section id="single-fill-info-section" style="margin-top: 1.5rem;">
+      <h2>Fill Information</h2>
+      <div id="fill-info">Please add cables and select conduit size.</div>
+    </section>
+
+    <section id="multi-fill-info-section" style="display: none; margin-top: 1.5rem;">
+      <h2>Multi-Conduit Fill Information</h2>
+      <div id="multi-fill-summary"></div>
+      <table id="multi-conduit-table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>Cable Name</th>
+            <th>Diameter (mm)</th>
+            <th>Area (mm²)</th>
+            <th>Assigned Conduit</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Canvas Visualisation -->
+    <section style="margin-top: 2rem;">
+      <h2>Conduit & Cable Visualization</h2>
+      <canvas id="conduit-canvas" width="700" height="400" style="border: 1px solid #d3c6b8; border-radius: 12px; background: #fcfaf7; display: block; margin: 1rem auto;"></canvas>
+    </section>
+
+  </div>
+
+  <!-- Link external JS -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
