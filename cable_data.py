@@ -10,22 +10,29 @@ def load_cable_db(filepath='cable_db.csv'):
         with open(filepath, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                # Convert numeric fields as appropriate
-                row['cores'] = int(row.get('cores', 1))
-                row['conductor_size_mm2'] = float(row.get('conductor_size_mm2', 0))
-                row['overall_diameter_mm'] = float(row.get('overall_diameter_mm', 0))
+                # Convert numeric fields first so we can use them in name
+                cores = int(row.get('cores', 3))
+                conductor_size = float(row.get('conductor_size_mm2', 4))
+
+                # Format name as you want
+                row['name'] = f"{cores}C {int(conductor_size)}mm²"  # int() to avoid decimals in mm²
+
+                # Store back numeric values as well
+                row['cores'] = cores
+                row['conductor_size_mm2'] = conductor_size
+                row['overall_diameter_mm'] = float(row.get('overall_diameter_mm', 9))
+
                 cables.append(row)
     except FileNotFoundError:
         print(f"Warning: {filepath} not found. Using default cable data.")
         cables = [
-            {"name": "Cable 1", "overall_diameter_mm": 10.0, "brand": "Brand1", "type": "Type1", "cores": 1,
-             "conductor_size_mm2": 16, "conductor_type": "Copper", "insulation": "X-90", "sheath": "PVC", "voltage_rating": "0.6/1 kV"},
-            {"name": "Cable 2", "overall_diameter_mm": 12.5, "brand": "Brand2", "type": "Type2", "cores": 2,
-             "conductor_size_mm2": 25, "conductor_type": "Copper", "insulation": "X-90", "sheath": "PVC", "voltage_rating": "0.6/1 kV"},
-            {"name": "Cable 3", "overall_diameter_mm": 8.0, "brand": "Brand3", "type": "Type1", "cores": 3,
-             "conductor_size_mm2": 10, "conductor_type": "Aluminum", "insulation": "X-90", "sheath": "PVC", "voltage_rating": "0.6/1 kV"},
+            {"name": "1C 16mm²", "cable_type": "Power", "cable_description": "PVC Insulated", "brand": "Olex", "cores": 1,
+             "conductor_size_mm2": 16, "conductor_type": "Copper", "insulation": "X-90", "sheath": "PVC", "voltage_rating": "0.6/1 kV",
+             "overall_diameter_mm": 9.3},
+            # ... add more defaults as needed ...
         ]
     return cables
+
 
 cable_db = load_cable_db()
 

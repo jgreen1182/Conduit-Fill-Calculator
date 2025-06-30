@@ -1,6 +1,6 @@
-name,brand,type,cores,conductor_size_mm2,conductor_type,insulation,sheath,voltage_rating,overall_diameter_mm
-16mm2 Single Core,Olex,Power,1,16,Copper,X-90,PVC,0.6/1 kV,9.3
-25mm2 Single Core,Olex,Power,1,25,Copper,X-90,PVC,0.6/1 kV,10.5
-35mm2 Single Core,Olex,Power,1,35,Copper,X-90,PVC,0.6/1 kV,11.5
-50mm2 Single Core,Olex,Power,1,50,Copper,X-90,PVC,0.6/1 kV,12.9
-70mm2 Single Core,Olex,Power,1,70,Copper,X-90,PVC,0.6/1 kV,14.7
+cable_type,cable_description,brand,cores,conductor_size_mm2,conductor_type,insulation,sheath,voltage_rating,overall_diameter_mm
+Power,PVC Insulated,Olex,1,16,Copper,X-90,PVC,0.6/1kV,9.3
+Power,PVC Insulated,Olex,1,25,Copper,X-90,PVC,0.6/1kV,10.5
+Power,PVC Insulated,Olex,1,35,Copper,X-90,PVC,0.6/1kV,11.5
+Power,PVC Insulated,Olex,1,50,Copper,X-90,PVC,0.6/1kV,12.9
+Power,PVC Insulated,Olex,1,70,Copper,X-90,PVC,0.6/1kV,14.7

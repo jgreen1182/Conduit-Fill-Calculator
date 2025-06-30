@@ -602,17 +602,17 @@ function populateModalTable(data) {
     row.appendChild(selectCell);
 
     const cols = [
-      'name',
-      'brand',
-      'type',
-      'cores',
-      'conductor_size_mm2',
-      'conductor_type',
-      'insulation',
-      'sheath',
-      'voltage_rating',
-      'overall_diameter_mm'
-    ];
+        'cable_type',
+        'cable_description',
+        'brand',
+        'cores',
+        'conductor_size_mm2',
+        'conductor_type',
+        'insulation',
+        'sheath',
+        'voltage_rating',
+        'overall_diameter_mm'
+      ];
     cols.forEach(col => {
       const cell = document.createElement('td');
       cell.textContent = cable[col] !== undefined ? cable[col] : '';
